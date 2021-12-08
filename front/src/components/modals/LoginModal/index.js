@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components';
 import { Link,useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import useInput from '../../../hooks/useInput';
 import { LOG_IN_REQUEST } from '../../../reducers/user';
 
@@ -10,7 +10,8 @@ const LoginModal = ({modal}) => {
   const navigate = useNavigate();
   const [email,onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
-
+  const {logInDone, logInError} = useSelector((state) => state.user);
+  const [firstRender, setFirstRender] = useState(true);
   const onSubmitForm = useCallback((e) => {
     e.preventDefault();
     console.log('제출 완료');
@@ -18,13 +19,25 @@ const LoginModal = ({modal}) => {
     dispatch({
       type: LOG_IN_REQUEST,
       data: {email, password}
-    })
-    navigate('/');
-    modal(false);
+    });
   }, [email, password]);
   const closeModal = useCallback(() => {
     modal(false);
   }, []);
+  useEffect(() => {
+    if (logInDone) {
+      modal(false);
+      navigate('/');
+    }
+  }, [logInDone]);
+
+  useEffect(() => {
+    if(logInError && !firstRender) {
+      alert(logInError);
+    }
+    setFirstRender(false);
+  },[logInError])
+
   return (
     <>
       <Container>

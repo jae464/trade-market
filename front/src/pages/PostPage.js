@@ -6,7 +6,6 @@ const PostPage = () => {
   return (
     <>
       <Header />
-      게시글 업로드 페이지
       <PostForm/>
     </>
   )

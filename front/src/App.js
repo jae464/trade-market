@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Provider } from 'react-redux';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
 import store from './store/configureStore';
 import DetailPage from './pages/DetailPage';
 import MainPage from './pages/MainPage';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/post" element={<PostPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
         </Routes>
+        <ToastContainer />
       </Router>
     </Provider>
   );

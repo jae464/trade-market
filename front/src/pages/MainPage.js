@@ -5,26 +5,42 @@ import { useNavigate } from "react-router";
 import Header from "../components/Header";
 import {itemDummy, generateDummyItem} from '../components/data/itemDummy';
 import ItemCard from '../components/ItemCard';
+import { useDispatch, useSelector } from "react-redux";
+import { LOAD_USER_INFO_REQUEST } from "../reducers/user";
+import { loadAllPostsAPI } from "../api/posts";
+import { toast } from "react-toastify";
 
 const MainPage = () => {
 	const navigate = useNavigate();
 	const [items, setItems] = useState([]);
-	const getData =  () => {
-		const dummyItems =  generateDummyItem(20);
-		setItems([...dummyItems]);
-		//console.log(items);
+	const {logInDone} = useSelector((state) => state.user);
+	const dispatch = useDispatch();
+	const getData =  async () => {
+		const result = await loadAllPostsAPI();
+		console.log('getData', result);
+		if(!result) return;
+		setItems((prev) => [...result, ...prev]);
 	};
 	useEffect(() => {
 		getData();
 		console.log(items);
 	}, []);
-
+	useEffect(() => {
+		dispatch({
+			type: LOAD_USER_INFO_REQUEST,
+		})
+	}, []);
 	const gotoPostpage = () => {
-		navigate('/post');
+		if (logInDone) {
+			navigate('/post');
+		} else {
+			alert('로그인이 필요합니다.');
+		}
 	}
   return (
 		<>
 			<Header />
+			<button onClick={(e)=>console.log(items)}></button>
 			<button onClick={gotoPostpage}>새 상품 등록</button>
 			<MainWrapper>
 				<ItemList>

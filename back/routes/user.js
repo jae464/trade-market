@@ -6,6 +6,25 @@ const {isLoggedIn, isNotLoggedIn} = require('./middlewares');
 const {User} = require('../models');
 const router = express.Router();
 
+// 로그인 정보 불러오기
+router.get('/', async (req, res, next) => { // GET /user
+  try {
+    if(req.user) {
+      const userInfo = await User.findOne({
+        where: {id: req.user.id},
+        attributes: {
+          exclude: ['password'],
+        }
+      });
+      res.status(200).json(userInfo);
+    } else{
+      res.status(400).json(null);
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+})
 // 회원가입
 router.post('/', isNotLoggedIn, async (req, res, next) => { // POST /user/
   try {
@@ -59,4 +78,11 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
     });
   })(req, res, next);
 });
+
+// 로그아웃
+router.post('/logout', isLoggedIn, (req, res) => {
+  req.logout();
+  req.session.destroy();
+  res.send('Logout Completed');
+})
 module.exports = router;

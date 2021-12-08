@@ -1,19 +1,34 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
+import { getLocationLabel } from "../../constants/location";
 
 const ItemCard = ({ item }) => {
 	const navigate = useNavigate();
-	const moveToDetail = useCallback(()=>{
-		navigate(`/detail/${item.id}`);
-	}, [])
+	const moveToDetail = useCallback((e)=>{
+    e.preventDefault();
+		navigate(`/detail/${item?.id}`);
+	}, []);
+  useEffect(() => {
+    console.log(item);
+  },[]);
+  const displayPrice = (price) => {
+		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+	}
   return (
     <>
       <CardWrapper onClick={moveToDetail}>
-        <img src={item.Images[0].src} alt={item.Images[0].src} />
+        {item.Images && item.Images[0]
+          ? (
+            <img src={`http://localhost:3070/${item.Images[0].src}`} alt={`http://localhost:3070/${item.Images[0].src}`} />
+          )
+          : null
+        }
+        {/* <img src={`http://localhost:3070/${item.Images[0].src}`} alt={`http://localhost:3070/${item.Images[0].src}`} /> */}
         <TitleWrapper>{item.title}</TitleWrapper>
-        <PriceWrapper>{item.price}원</PriceWrapper>
+        <PriceWrapper>{displayPrice(item.price)}원</PriceWrapper>
+        {getLocationLabel(item.User.location)}
       </CardWrapper>
     </>
   );
