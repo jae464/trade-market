@@ -9,7 +9,11 @@ const path = require('path');
 const userRouter = require('./routes/user');
 const postRouter = require('./routes/post');
 const postsRouter = require('./routes/posts');
+const tradeRouter = require('./routes/trade');
+const chatroomRouter = require('./routes/chatroom');
+const chatRouter = require('./routes/chat');
 const passportConfig = require('./passport');
+const webSocket = require('./socket');
 
 const db = require('./models');
 
@@ -43,6 +47,11 @@ app.use(passport.session());
 app.use('/user', userRouter);
 app.use('/post', postRouter);
 app.use('/posts', postsRouter);
-app.listen(3070, () => {
+app.use('/trade', tradeRouter);
+app.use('/chatroom', chatroomRouter);
+app.use('/chat', chatRouter);
+const server = app.listen(3070, () => {
   console.log('서버 실행중');
-})
+});
+
+webSocket(server, app);

@@ -83,18 +83,9 @@ const SignUpPage = () => {
             value={location}
             onChange={onChangeLocation}  
           >
-            {/* 서울 인천 경기 대구 부산 대전 울산 광주 */}
             {locations.map((v) => (
               <option value={v.value}>{v.label}</option>
             ))}
-            {/* <option value="seoul" selected>서울</option>
-            <option value="incheon">인천</option>
-            <option value="gyeong-gi">경기</option>
-            <option value="daegu">대구</option>
-            <option value="busan">부산</option>
-            <option value="daejeon">대전</option>
-            <option value="ulsan">울산</option>
-            <option value="gwangju">광주</option> */}
           </select>
           <button htmlFor="submit">가입조지기</button>
           <button>취소조지기</button>

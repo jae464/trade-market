@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router";
 import useInput from '../hooks/useInput';
 import { LOG_IN_REQUEST } from '../reducers/user';
+import { LOAD_MY_POST_REQUEST } from '../reducers/post';
 const LoginPage = () => {
 
   const navigate = useNavigate();

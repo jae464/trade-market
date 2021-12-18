@@ -33,14 +33,6 @@ const upload = multer({
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {  // POST /post
   console.log('게시글업로드부분', req.body);
   try {
-    // const post = await Post.create({
-    //   UserId: req.user.id,
-    //   title: req.body.title,
-    //   content: req.body.content,
-    //   price: req.body.price,
-    //   // category: req.body.category,
-    //   trade: req.body.trade,
-    // });
     const category = await Category.findOrCreate({
       where: {category: req.body.category}
     });
@@ -92,7 +84,29 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {  // POST
         // await post.addWantCategory(wantCategory);
       }
     }
-    res.status(201).json(post);
+    const fullPostInfo = await Post.findOne({
+      where: {id: post.id},
+      order: [
+        ['createdAt', 'DESC'],
+      ],
+      include: [
+        {
+          model: Image,
+        },
+        {
+          model: User,
+          attributes:['id', 'location', 'nickname']
+        }
+      ]
+    })
+    const data = post.toJSON();
+    if(Array.isArray(req.body.image)) {
+      data.Images = req.body.image.map((image) => ({src: image}));
+    } else {
+      data.Images = [{src: req.body.image}];
+    }
+    
+    res.status(201).json(fullPostInfo);
   } catch (err) {
     console.error(err);
     next(err);
@@ -119,14 +133,17 @@ router.get('/:postId', async (req, res, next) => { // GET /post
         },
         {
           model: Category,
+        }, 
+        {
+          model: Category,
           as: 'WantCategorys'
         },
         {
           model: User,
-          attributes: ['location'],
+          attributes: ['location','nickname'],
         }
       ]
-    })
+    });
     res.status(201).json(post);
   } catch (err) {
     console.error(err);

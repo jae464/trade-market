@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => { // GET /posts
   try {
     const posts = await Post.findAll({
-      limit: 10,
+      limit: 100,
       order: [
         ['createdAt', 'DESC']
       ],
@@ -17,7 +17,7 @@ router.get('/', async (req, res, next) => { // GET /posts
         },
         {
           model: User,
-          attributes: ['id','location'],
+          attributes: ['id','location','nickname'],
         }
       ]
     });
@@ -28,4 +28,68 @@ router.get('/', async (req, res, next) => { // GET /posts
   }
 });
 
+// 게시글 검색 결과 불러오기
+router.get('/search/:searchWord', async (req, res, next) => { // GET /posts/search/searchWord
+  try {
+    const posts = await Post.findAll({
+      where: {
+        [Op.or]: [
+          {
+            title: {
+              [Op.like]: "%" + req.params.searchWord + "%",
+            }
+          },
+          {
+            content: {
+              [Op.like]: "%" + req.params.searchWord + "%",
+            }
+          },
+        ]
+      },
+      order: [
+        ['createdAt', 'DESC']
+      ],
+      include: [
+        {
+          model: Image,
+        },
+        {
+          model: User,
+          attributes: ['id','location','nickname'],
+        }
+      ]
+    });
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+})
+// 나의 게시글 불러오기
+router.get('/:userId', async(req,res,next) => { // GET /posts/userId
+  try {
+    const posts = await Post.findAll({
+      where: {
+        UserId: req.user.id,
+      },
+      order: [
+        ['createdAt', 'DESC']
+      ],
+      include: [
+        {
+          model: Image,
+        },
+        {
+          model: User,
+          attributes: ['id', 'location']
+        }
+      ]
+    });
+    // console.log(posts);
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+})
 module.exports = router;

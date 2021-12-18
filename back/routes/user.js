@@ -85,4 +85,19 @@ router.post('/logout', isLoggedIn, (req, res) => {
   req.session.destroy();
   res.send('Logout Completed');
 })
+
+// 특정 유저 정보 받아오기
+router.get('/:userId', isLoggedIn, async (req,res, next) => {
+  try {
+    const user = await User.findOne({
+      where: {id: req.params.userId},
+      attributes: ['id','location','nickname'],
+    })
+    console.log('router에서 user data : ',user);
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+})
 module.exports = router;

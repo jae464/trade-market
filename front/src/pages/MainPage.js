@@ -9,11 +9,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { LOAD_USER_INFO_REQUEST } from "../reducers/user";
 import { loadAllPostsAPI } from "../api/posts";
 import { toast } from "react-toastify";
+import { LOAD_MY_POST_REQUEST } from "../reducers/post";
 
 const MainPage = () => {
 	const navigate = useNavigate();
 	const [items, setItems] = useState([]);
-	const {logInDone} = useSelector((state) => state.user);
+	const {logInDone, me} = useSelector((state) => state.user);
+	const {posts} = useSelector((state) => state.post);
 	const dispatch = useDispatch();
 	const getData =  async () => {
 		const result = await loadAllPostsAPI();
@@ -26,10 +28,19 @@ const MainPage = () => {
 		console.log(items);
 	}, []);
 	useEffect(() => {
+		if(logInDone) return;
 		dispatch({
 			type: LOAD_USER_INFO_REQUEST,
-		})
+		});
 	}, []);
+	useEffect(() => {
+		if (me?.id && posts.length === 0) {
+			dispatch({
+				type: LOAD_MY_POST_REQUEST,
+				data: me.id,
+			})
+		}
+	}, [me]);
 	const gotoPostpage = () => {
 		if (logInDone) {
 			navigate('/post');

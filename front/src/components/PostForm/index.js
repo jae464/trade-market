@@ -6,14 +6,14 @@ import styled from 'styled-components';
 import useInput from '../../hooks/useInput';
 import { categories } from '../../constants/category';
 import * as api from '../../api/post';
-import { ADD_POST_REQUEST, IMAGE_UPLOAD_REQUEST, REMOVE_ALL_IMAGES, REMOVE_IMAGE } from '../../reducers/post';
+import { ADD_POST_REQUEST} from '../../reducers/post';
 
 const PostForm = () => {
   const [title,onChangeTitle] = useInput('');
   const [content, onChangeContent] = useInput('');
   const [price, onChangePrice] = useInput('');
   const [imagePaths, setImagePaths] = useState([]);
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('elect');
   const [trade, setTrade] = useState(true);
   const [wantCategory, setWantCategory] = useState([]);
 
@@ -54,9 +54,6 @@ const PostForm = () => {
 
   const onGoBack = useCallback((e) => {
     e.preventDefault();
-    dispatch({
-      type: REMOVE_ALL_IMAGES,
-    })
     navigate('/');
   }, []);
 
@@ -88,9 +85,16 @@ const PostForm = () => {
     formData.append('category', category);
     formData.append('trade', trade);
     
-    const result = await api.addPostAPI(formData);
-    console.log(result);
-    navigate('/');
+    dispatch({
+      type: ADD_POST_REQUEST,
+      data: formData,
+    })
+    // const result = await api.addPostAPI(formData);
+    // console.log(result);
+    
+    setTimeout(()=>{
+      navigate('/');
+    },300);
   },[title, content, imagePaths]);
 
   const onChangeTrade = useCallback((e)=>{

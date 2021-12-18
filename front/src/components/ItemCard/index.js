@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 import { getLocationLabel } from "../../constants/location";
 
-const ItemCard = ({ item }) => {
+const ItemCard = ({ item, type }) => {
 	const navigate = useNavigate();
 	const moveToDetail = useCallback((e)=>{
     e.preventDefault();
@@ -12,13 +12,14 @@ const ItemCard = ({ item }) => {
 	}, []);
   useEffect(() => {
     console.log(item);
+    console.log(type);
   },[]);
   const displayPrice = (price) => {
 		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
 	}
   return (
     <>
-      <CardWrapper onClick={moveToDetail}>
+      <CardWrapper onClick={moveToDetail} type={type}>
         {item.Images && item.Images[0]
           ? (
             <img src={`http://localhost:3070/${item.Images[0].src}`} alt={`http://localhost:3070/${item.Images[0].src}`} />
@@ -28,15 +29,17 @@ const ItemCard = ({ item }) => {
         {/* <img src={`http://localhost:3070/${item.Images[0].src}`} alt={`http://localhost:3070/${item.Images[0].src}`} /> */}
         <TitleWrapper>{item.title}</TitleWrapper>
         <PriceWrapper>{displayPrice(item.price)}원</PriceWrapper>
-        {getLocationLabel(item.User.location)}
+        {type==='mypage' ? null : getLocationLabel(item.User.location)}
       </CardWrapper>
     </>
   );
 };
 
 const CardWrapper = styled.div`
-  width: 20rem;
-  height: 30rem;
+  width: ${({ type }) => (type === 'mypage' ? '10rem' : '20rem')};
+  // width: 20rem;
+  height: ${({ type }) => (type === 'mypage' ? '15rem' : '30rem')};
+  // height: 30rem;
   margin: 1rem;
   // border: 1px solid black;
   display: flex;
@@ -44,7 +47,6 @@ const CardWrapper = styled.div`
   border-radius: 4px;
   cursor: pointer;
   flex-direction: column;
-  item-align: center;
   @media (max-width: 1056px) {
     width: calc(50% - 2rem);
   }
@@ -64,10 +66,7 @@ const TitleWrapper = styled.div`
   margin-left: 4px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  // word-break: break-word;
-  // margin: 1rem;
-  // line-height: 1.5;
-  // height: 1rem;
+  font-weight: bold;
 `;
 
 const PriceWrapper = styled.div`

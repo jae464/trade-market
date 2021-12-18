@@ -12,3 +12,21 @@ export const loadAllPostsAPI = async () => {
   }
 }
 
+export const loadMyPostsAPI = async(data) => {
+  try {
+    const result = await axios.get(`/posts/${data}`);
+    return result.data;
+  } catch (err) {
+    toast.error('내 게시글을 불러오는데 실패했습니다.');
+  }
+}
+
+export const searchPostAPI = async (data) => {
+  try {
+    const result = await axios.get(`/posts/search/${data}`);
+    return result.data;
+  } catch (err) {
+    toast.error('게시글 검색에 실패했습니다.')
+  }
+}
+

@@ -1,36 +1,68 @@
 import React, { useEffect,useState,useCallback } from "react";
-import { useSelector } from "react-redux";
-import { useLocation, useParams, useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router";
 import styled from "styled-components";
+import {FcPrevious, FcNext} from 'react-icons/fc';
 import * as api from "../api/post";
 import Header from "../components/Header";
+import BuyModal from "../components/modals/BuyModal";
+import DeleteModal from "../components/modals/DeleteModal";
+import TradeModal from "../components/modals/TradeModal";
 import { getLabel } from "../constants/category";
 import { getLocationLabel } from "../constants/location";
+import { LOAD_USER_INFO_REQUEST } from "../reducers/user";
 const DetailPage = ({ postid }) => {
   const params = useParams();
 	const navigate = useNavigate();
 	const [post, setPost] = useState('');
 	const [image, setImage] = useState(0); // 현재 이미지 인덱스
+	const [isDeleteModal, setDeleteModal] = useState(false);
+	const [isTradeModal, setTradeModal] = useState(false);
+	const [isBuyModal, setBuyModal] = useState(false);
 	const {me} = useSelector((state) => state.user);
+	const dispatch = useDispatch();
+
   const getPost = async () => {
     const result = await api.getPostAPI(params.postId);
     console.log(result);
 		if(!result) return;
 		setPost(result);
+		console.log(post);
   };
   useEffect(() => {
 		console.log('렌더링')
     getPost();
 		console.log(me);
   }, []);
+	useEffect(() => {
+		dispatch({
+			type: LOAD_USER_INFO_REQUEST,
+		});
+	}, []);
 	const displayPrice = (price) => {
 		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
 	}
-	const deletePost = async () => {
-		const result = await api.deletePostAPI(params.postId);
-		navigate('/');
-		if(!result) return;
-	}
+
+	const showPrevImage = useCallback(() => {
+		console.log(post);
+		setImage((prev) => prev - 1 >= 0 ? prev - 1 : post.Images.length - 1);
+	}, [post, image]);
+
+	const showNextImage = useCallback(() => {
+		setImage((prev) => (prev + 1) % post.Images.length);
+	}, [post, image]);
+
+	const deletePost = useCallback(() => {
+		setDeleteModal((prev) => !prev);
+	}, []);
+
+	const tradeRequest = useCallback(() => {
+		setTradeModal((prev) => !prev);
+	},[]);
+
+	const buyRequest = useCallback(() => {
+		setBuyModal((prev) => !prev);
+	})
   return (
     <>
       <Header />
@@ -40,6 +72,10 @@ const DetailPage = ({ postid }) => {
 					<ImageWrapper>
 						{post.Images && <img src={`http://localhost:3070/${post.Images[image].src}`} />}
 						{/* <button className='nextBtn'>{'<'}</button> */}
+						<ImageButtonWrapper>
+							<FcPrevious className="img_prev" onClick={showPrevImage} />
+							<FcNext className="img_next" onClick={showNextImage} />
+						</ImageButtonWrapper>
 					</ImageWrapper>
 					<ItemWrapper>
 						<TitleWrapper>
@@ -48,6 +84,10 @@ const DetailPage = ({ postid }) => {
 						<PriceWrapper>
 							{post.price && displayPrice(post.price)}원
 						</PriceWrapper>
+						<CategoryWrapper>
+							<span className="category">카테고리</span>
+							<span>{post && getLabel(post.Category.category)}</span>
+						</CategoryWrapper>
 						<TradeWrapper>
 							<span className="trade-available">교환 여부</span>
 							{post.trade ? <span>교환가능</span> : <span>교환 불가능</span>}
@@ -63,9 +103,20 @@ const DetailPage = ({ postid }) => {
 							<span className='location'>거래지역</span>
 							<span className='user-location'>{post && getLocationLabel(post.User.location)}</span>
 						</LocationWrapper>
+						<AuthorInfo>
+							<span className="author">판매자</span>
+							<span className="author-nickname">{post && post.User.nickname}</span>
+						</AuthorInfo>
 						<ButtonWrapper>
-							{post && post.UserId === me?.id ? <button className='edit'>편집</button> : <button className='buy'>구매요청</button>}
-							{post && post.UserId === me?.id ? <button onClick={deletePost}>삭제</button>:<button className='trade'>교환요청</button>}
+							{post && post.UserId === me?.id 
+								? <button className='edit'>편집</button> 
+								: <button className='buy' onClick={buyRequest}>구매요청</button>}
+							{isBuyModal && <BuyModal setModal={setBuyModal} post={post} />}
+							{post && post.UserId === me?.id 
+								? <button onClick={deletePost}>삭제</button>
+								:<button className='trade' onClick={tradeRequest}>교환요청</button>}
+							{isDeleteModal && <DeleteModal setModal={setDeleteModal} postId={post.id} />}
+							{isTradeModal && <TradeModal setModal={setTradeModal} post={post} />}
 						</ButtonWrapper>
 					</ItemWrapper>
 				</CardWrapper>
@@ -95,36 +146,51 @@ const MainWrapper = styled.div`
 const CardWrapper = styled.div`
 	margin-top: 2rem;
 	display: flex;
+	align-items: center;
 `;
 const ImageWrapper = styled.div`
 	margin-right: 2rem;
 	width: 600px;
 	height: 400px;
+	justify-content: flex-end;
 	img {
 		width: 100%;
-		height: 100%;
-		width: 100%;
-		height: 100%;
+		height: 80%;
 		object-fit: contain;
-		// float: left;
 	}
-	.nextBtn {
-		position: absolute;
-		float: left;
-		top: 50%;
-		left: auto;
+`
+const AuthorInfo = styled.div`
+	margin-top: 2rem;
+	.author {
+		margin-right: 1rem;
+		font-size: 1rem;
+		color: rgb(153, 153, 153);
 	}
+`
+const ImageButtonWrapper = styled.div`
+	width:100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 1rem;
+	.img_prev {
+		margin-right: 2rem;
+		font-size: 1.5rem;
+		cursor: pointer;
+	}
+	.img_next {
+		margin-left: 2rem;
+		font-size: 1.5rem;
+		cursor:pointer;
+	}
+	
 `
 const ItemWrapper = styled.div`
  margin-left: 2rem;
  width: 100%;
- .location {
-	 
- }
  
 `
 const TitleWrapper = styled.div`
-	// margin: 10px;
 	font-size: 2rem;
 	font-weight: bold;
 	padding-bottom: 1rem;
@@ -136,6 +202,15 @@ const PriceWrapper = styled.div`
 	font-weight: bold;
 	margin-bottom: 1rem;
 	margin-top: 1rem;
+`
+
+const CategoryWrapper = styled.div`
+ .category {
+	 margin-right: 1rem;
+	 font-size: 1rem;
+	 color: rgb(153, 153, 153);
+ }
+ margin-bottom: 2rem;
 `
 const TradeWrapper = styled.div`
 	font-size: 1rem;

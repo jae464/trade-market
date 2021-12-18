@@ -26,6 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     db.Post.belongsTo(db.Category); // CategoryId 생김
     db.Post.hasMany(db.Image);
     db.Post.belongsToMany(db.Category, {through: 'WantCategory', as:'WantCategorys'});
+    // db.Post.belongsToMany(db.Post, {through: 'Trade', as: 'Requests', foreignKey: 'ReceivePostId'});
+    // db.Post.belongsToMany(db.Post, {through: 'Trade', as: 'Receives', foreignKey: 'RequestPostId'});
     // db.Post.belongsTo(db.Category);
   };
   return Post;

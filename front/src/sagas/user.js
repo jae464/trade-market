@@ -1,5 +1,6 @@
 import {all, fork, call, put, takeLatest, delay, take} from '@redux-saga/core/effects';
 import axios from 'axios';
+import { REMOVE_ALL_POST } from '../reducers/post';
 import { LOAD_USER_INFO_FAILURE, LOAD_USER_INFO_REQUEST, LOAD_USER_INFO_SUCCESS, LOG_IN_FAILURE, LOG_IN_REQUEST, LOG_IN_SUCCESS, LOG_OUT_FAILURE, LOG_OUT_REQUEST, LOG_OUT_SUCCESS, SIGN_UP_FAILURE, SIGN_UP_REQUEST, SIGN_UP_SUCCESS } from '../reducers/user';
 
 function logInAPI(data) {
@@ -47,6 +48,9 @@ function* logOut(action) {
     yield call(logOutAPI, action.data);
     yield put({
       type: LOG_OUT_SUCCESS,
+    });
+    yield put({
+      type: REMOVE_ALL_POST,
     })
   } catch (err) {
     console.error(err);
